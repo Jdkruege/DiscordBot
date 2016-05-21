@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="BotStarter.cs" />
     <Compile Include="EventBot.cs" />
+    <Compile Include="MessageHandlers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -17,17 +17,22 @@ namespace DiscordBot
         {
             bot = new DiscordClient();
 
-            bot.MessageReceived += getMessage;
+            MessageHandlers.init();
+
+            //bot.MessageReceived += getMessage;
+            bot.MessageReceived += MessageHandlers.InfoHandler;
+            bot.MessageReceived += MessageHandlers.HelpHandler;
 
             XmlDocument doc = new XmlDocument();
 
             doc.Load("Info.xml");
 
-            XmlNode token = doc.DocumentElement.SelectSingleNode("/Credentials/Token");
+            XmlNode token = doc.DocumentElement.SelectSingleNode("/Info/Token");
 
-            if(token != null)
+            if (token != null)
                 bot.Connect(token.InnerText);
         }
+
 
         ~EventBot()
         {
@@ -36,8 +41,6 @@ namespace DiscordBot
 
         public void start()
         {
-            //bot.SetGame("Discord Manager 2016");
-
             bot.Wait();
         }
 

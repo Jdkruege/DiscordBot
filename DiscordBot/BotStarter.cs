@@ -19,7 +19,7 @@ namespace DiscordBot
 
             th1.Start();
 
-            while (!(Console.ReadLine().CompareTo("Stop") == 0));
+            while (Console.ReadLine().Length == 0);
 
             th1.Abort();
 
