@@ -12,16 +12,11 @@ namespace DiscordBot
     class EventBot
     {
         private DiscordClient bot;
+        private MessageHandler handler;
 
         public EventBot()
         {
             bot = new DiscordClient();
-
-            MessageHandlers.init();
-
-            //bot.MessageReceived += getMessage;
-            bot.MessageReceived += MessageHandlers.InfoHandler;
-            bot.MessageReceived += MessageHandlers.HelpHandler;
 
             XmlDocument doc = new XmlDocument();
 
@@ -29,36 +24,22 @@ namespace DiscordBot
 
             XmlNode token = doc.DocumentElement.SelectSingleNode("/Info/Token");
 
+            handler = new MessageHandler(doc);
+
+            bot.MessageReceived += handler.dispatcher;
+
             if (token != null)
                 bot.Connect(token.InnerText);
         }
-
 
         ~EventBot()
         {
             bot.Disconnect();
         }
 
-        public void start()
+        public void Start()
         {
             bot.Wait();
-        }
-
-        private void getMessage(object sender, MessageEventArgs e)
-        {
-            if(!e.Message.IsAuthor)
-            {
-                StringBuilder strB = new StringBuilder();
-
-                strB.AppendLine("Server: " + e.Server.Name);
-                strB.AppendLine("Channel: " + e.Channel.Name);
-                strB.AppendLine("User: " + e.User.Name);
-                strB.AppendLine("Message: \"" + e.Message.Text + "\"");
-
-                e.Message.Delete();
-
-                e.Channel.SendMessage(strB.ToString());
-            }  
         }
     }
 }

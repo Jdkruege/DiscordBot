@@ -15,17 +15,7 @@ namespace DiscordBot
         {
             EventBot eBot = new EventBot();
 
-            Thread th1 = new Thread(new ThreadStart(eBot.start));
-
-            th1.Start();
-
-            while (Console.ReadLine().Length == 0);
-
-            th1.Abort();
-
-            th1.Join();
-
-            Console.WriteLine("Closing");
+            eBot.Start();
         }
     }
 }
