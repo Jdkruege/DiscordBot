@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Data.SqlClient;
 
 using Discord;
 
@@ -13,31 +14,37 @@ namespace DiscordBot
     {
         private static XmlDocument _doc;
         private string[] _splitter = {" "};
+        private List<string> _channels;
+        private bool _pmFlag;
 
-        private List<Tuple<String, Invite>> _invites;
+        private List<Tuple<string, Invite>> _invites;
 
-        public MessageHandler(XmlDocument doc)
+        public MessageHandler(XmlDocument doc, List<string> channels, bool pmFlag)
         {
             _doc = doc;
+            _channels = channels;
+            _pmFlag = pmFlag;
+            
             _invites = new List<Tuple<string, Invite>>();
         }
 
+        /*
+         *   
+         */
         public void dispatcher(object sender, MessageEventArgs e)
         {
             Message msg = e.Message;
-            String text = msg.Text;
-            String channel = msg.Channel.Name;
-            if (!msg.IsAuthor && channel.Contains("bot"))
+            string text = msg.Text;
+            if (!msg.IsAuthor &&  true)
             {
-                String command = text.Split(_splitter, StringSplitOptions.RemoveEmptyEntries)[0].ToLower();
+                string command = text.Split(_splitter, StringSplitOptions.RemoveEmptyEntries)[0].ToLower();
                 switch(command)
                 {
                     case "!info":
                         Info(e.Channel);
                         break;
                     case "!help":
-                        if (channel.Contains("admin")) ;
-                        else Help(e.Channel);;
+                        Help(e.Channel);
                         break;
                     case "!gear":
                         Gear(e.Channel, text);
@@ -46,61 +53,65 @@ namespace DiscordBot
                         Boss(e.Channel, text);
                         break;
                     case "!event":
-                        if (channel.Contains("admin")) ;
-                        else Event(e.Channel, text);
+                        Event(e.Channel, text);
                         break;
                     case "!activity":
-                        if (channel.Contains("admin")) ;
-                        else Activity(e.Channel, text);
+                        Activity(e.Channel, text);
                         break;
                     case "!invite":
                         Invite(e.Channel);
                         break;
                     case "!feedback":
-                        if (channel.Contains("admin")) ;
-                        else Feedback(e.Channel, text);
+                        Feedback(e.Channel, text);
                         break;
                     default:
                         break;
-
                 }
             }
         }
         
+        /*
+         * Provides information about the bot.
+         * Needs a reference to the channel to talk in
+         */
         private void Info(Channel ch)
         {
-                XmlNode owner = _doc.SelectSingleNode("/Info/Owner");
+            StringBuilder infoStr = new StringBuilder();
 
-                StringBuilder info = new StringBuilder();
+            XmlNode owner = _doc.SelectSingleNode("/Info/Owner");
 
-                info.AppendLine("I am a bot. I am the master of this room.");
-                info.AppendLine("My owner is: " + owner.InnerText);
+            infoStr.AppendLine("I am a bot. I am the master of this room.");
+            infoStr.AppendLine("My owner is: " + owner.InnerText);
 
-                ch.SendMessage(info.ToString());
+            ch.SendMessage(infoStr.ToString());
         }
 
+        // Function that returns information on all the functions the bot can provide
         private void Help(Channel ch)
         {
-                StringBuilder help = new StringBuilder();
+            StringBuilder helpStr = new StringBuilder();
 
-                help.AppendLine("List of supported commands:");
-                help.Append("```");
-                help.AppendLine("!info      --  General info about this bot.");
-                help.AppendLine("!help      --  List of supported commands.");
-                help.AppendLine("!gear      --  Lookup, input, or modify gear of guildmates");
-                help.AppendLine("!boss      --  Update and search boss timers.");
-                help.AppendLine("!event     --  Lookup and register events.");
-                help.AppendLine("!activity  --  Lookup and register player participation");
-                help.AppendLine("!invite    --  Produces an invitation to the server.");
-                help.AppendLine("!feedback  --  File anonymous feedback.");
-                help.Append("```");
-                help.AppendLine("For a guide on command formatting or general command help, type \"!<command> --help\"");
+            helpStr.AppendLine("List of supported commands:");
+            helpStr.Append("```");
+            helpStr.AppendLine("!info      --  General info about this bot.");
+            helpStr.AppendLine("!help      --  List of supported commands.");
+            helpStr.AppendLine("!gear      --  Lookup, input, or modify gear of guildmates");
+            helpStr.AppendLine("!boss      --  Update and search boss timers.");
+            helpStr.AppendLine("!event     --  Lookup and register events.");
+            helpStr.AppendLine("!activity  --  Lookup and register player participation");
+            helpStr.AppendLine("!invite    --  Produces an invitation to the server.");
+            helpStr.AppendLine("!feedback  --  File anonymous feedback.");
+            helpStr.Append("```");
+            helpStr.AppendLine("For a guide on command formatting or general command help, type \"!<command> --help\"");
 
-               ch.SendMessage(help.ToString());
+            ch.SendMessage(helpStr.ToString());
         }
 
-        private void Gear(Channel ch, String text)
+        // Function that deals with character gear information
+        private void Gear(Channel ch, string text)
         {
+            StringBuilder gearStr = new StringBuilder(); 
+
             if(text.Contains("--help"))
             {
 
@@ -111,8 +122,11 @@ namespace DiscordBot
             }
         }
 
-        private void Boss(Channel ch, String text)
+        // Function that deals with boss states
+        private void Boss(Channel ch, string text)
         {
+            StringBuilder bossStr = new StringBuilder();
+
             if (text.Contains("--help"))
             {
 
@@ -123,8 +137,11 @@ namespace DiscordBot
             }
         }
 
-        private void Event(Channel ch, String text)
+        // Function that deals with events
+        private void Event(Channel ch, string text)
         {
+            StringBuilder eventStr = new StringBuilder();
+
             if (text.Contains("--help"))
             {
 
@@ -135,8 +152,11 @@ namespace DiscordBot
             }
         }
 
-        private void Activity(Channel ch, String text)
+        // Function that deals with player activity in events
+        private void Activity(Channel ch, string text)
         {
+            StringBuilder activityStr = new StringBuilder();
+
             if (text.Contains("--help"))
             {
 
@@ -147,12 +167,16 @@ namespace DiscordBot
             }
         }
 
+        /*
+         * Returns an invite to this server we are operating on.
+         * Pulls a still active invite if possible, generates a new invite if no current invite is available
+        */
         private async void Invite(Channel ch)
         {
             // Lock to prevent multiple threads from altering data at once.
             lock (_invites)
             {
-                foreach (Tuple<String, Invite> t in _invites)
+                foreach (Tuple<string, Invite> t in _invites)
                 {
                     if (t.Item2.IsRevoked)
                     {
@@ -171,13 +195,16 @@ namespace DiscordBot
             // If no invite has been made before, or our previous invite expired we make a new invite
             Invite inv = await ch.Server.CreateInvite(1800, null, false, false);
 
-            _invites.Add(new Tuple<String,Invite>(ch.Server.Name, inv));
+            _invites.Add(new Tuple<string,Invite>(ch.Server.Name, inv));
 
             ch.SendMessage(inv.Url);
         }
 
-        private void Feedback(Channel ch, String text)
+        // Function in charge of filing anonymous complaints
+        private void Feedback(Channel ch, string text)
         {
+            StringBuilder eventStr = new StringBuilder();
+
             if (text.Contains("--help"))
             {
 

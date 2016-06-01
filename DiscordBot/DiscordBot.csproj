@@ -79,7 +79,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Info.xml" />
+    <Content Include="bin\Debug\Info.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Info.xml">
       <SubType>Designer</SubType>
     </Content>
