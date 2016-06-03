@@ -35,7 +35,7 @@ namespace DiscordBot
         {
             Message msg = e.Message;
             string text = msg.Text;
-            if (!msg.IsAuthor &&  true)
+            if (!msg.IsAuthor &&  (_channels.Contains(msg.Channel.Name) || (msg.Channel.IsPrivate && _pmFlag)))
             {
                 string command = text.Split(_splitter, StringSplitOptions.RemoveEmptyEntries)[0].ToLower();
                 switch(command)

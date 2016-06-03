@@ -37,7 +37,7 @@ namespace DiscordBot
 
             // Get the flag indicating if the bot should respond to private messages
             string usePMs = doc.DocumentElement.SelectSingleNode("/Info/UsePMs").InnerText;
-            bool pmFlag = (usePMs.Equals("true", StringComparison.CurrentCultureIgnoreCase) ? true ? false);
+            bool pmFlag = (usePMs.Equals("true", StringComparison.CurrentCultureIgnoreCase) ? true : false);
 
             handler = new MessageHandler(doc, appChans, pmFlag);
 
