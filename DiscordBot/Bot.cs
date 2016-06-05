@@ -9,14 +9,11 @@ using Discord;
 
 namespace DiscordBot
 {
-    class EventBot
+    class Bot
     {
-        private DiscordClient bot;
-        private MessageHandler handler;
-
-        public EventBot()
+        public static void Main(string[] args)
         {
-            bot = new DiscordClient();
+            DiscordClient bot = new DiscordClient();
 
             XmlDocument doc = new XmlDocument();
 
@@ -39,9 +36,11 @@ namespace DiscordBot
             string usePMs = doc.DocumentElement.SelectSingleNode("/Info/UsePMs").InnerText;
             bool pmFlag = (usePMs.Equals("true", StringComparison.CurrentCultureIgnoreCase) ? true : false);
 
-            handler = new MessageHandler(doc, appChans, pmFlag);
+            CommandsList cList = Commands.Setup(doc);
 
-            bot.MessageReceived += handler.dispatcher;
+            Dispatcher.Setup(appChans, pmFlag, cList);
+
+            bot.MessageReceived += Dispatcher.MessageReceived;
 
             Console.WriteLine("-- Attempting to log in.");
             if (token != null)
@@ -52,16 +51,8 @@ namespace DiscordBot
             else
             {
                 Console.WriteLine(" -- Token not found. Check Info.xml to ensure a token is set.");
-            }    
-        }
+            }
 
-        ~EventBot()
-        {
-            bot.Disconnect();
-        }
-
-        public void Start()
-        {
             Console.WriteLine("-- Bot is now in control.");
             bot.Wait();
         }

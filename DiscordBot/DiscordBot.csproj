@@ -69,9 +69,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BotStarter.cs" />
-    <Compile Include="EventBot.cs" />
-    <Compile Include="MessageHandlers.cs" />
+    <Compile Include="Commands.cs" />
+    <Compile Include="CommandsList.cs" />
+    <Compile Include="Dispatcher.cs" />
+    <Compile Include="Bot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
